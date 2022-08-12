@@ -132,6 +132,10 @@ void codifica(int *in, int n)
     printf("[%d]\n", corrente);
 }
 //my functions
+int baseToInt( char base ){
+    return 44;
+}
+
 void readFile(char *header, char *filename, int *nL, int *nC, int *dataImage)
 {
     FILE *file = fopen(filename, "r");
@@ -141,17 +145,14 @@ void readFile(char *header, char *filename, int *nL, int *nC, int *dataImage)
         exit(1);
     }
 
-    //imagem
-    //dataImage = malloc(sizeof(int) * (*nL) * (*nC));
-
     //ler o cabecalho
     fread(header, 1, sizeof(header), file);
-    
-    //ler o numero de linhas e colunas com fscan
+        //ler o numero de linhas e colunas com fscan
     fscanf(file, "%d %d", nL, nC);
 
     //ler o conteudo da imagem
-
+    dataImage = malloc(*nL * *nC * sizeof(int));
+    
     char *auxLine;      
     //auxLine = malloc(sizeof(char)*(*nL)*(*nC));
     auxLine = calloc(sizeof(char), (*nL)*(*nC));
@@ -163,15 +164,36 @@ void readFile(char *header, char *filename, int *nL, int *nC, int *dataImage)
         for (int j = 0; j < *nC; j++)
         {
             fscanf(file, "%c", &auxLine[i*(*nC)+j]);
-            printf("%c", auxLine[i*(*nC)+j]);
+            //printf("%c", auxLine[i*(*nC)+j]);
+            dataImage[i*(*nC)+j] = baseToInt(auxLine[i*(*nC)+j]);
             qntdPixels++;
         }      
     }
     printf("\n");
     printf("PIXELS %d\n", qntdPixels);
+    fclose(file);
+}
 
+void printFile(char *header, char *filename, int *nL, int *nC, int *dataImage){
+    char *fileName = malloc(sizeof(char)*(strlen(filename)+strlen(".out")));
+    FILE *file = fopen("Resultado", "wt");
+    if (file == NULL)
+    {
+        printf("Erro ao salvar o arquivo %s\n", filename);
+        exit(1);
+    }
+    fwrite(header, 1, sizeof(header), file);
+    fprintf(file, "%d %d\n", *nL, *nC);
     
-    
+    for (int i = 0; i < *nL ; i++)
+    {
+        for (int j = 0; j < *nC; j++)
+        {
+            fprintf(file, "%d", dataImage[i*(*nC)+j]);
+        }
+        fprintf(file, "\n");
+    }
+
     fclose(file);
 }
 
@@ -183,9 +205,11 @@ int main(int argc, char *argv[])
     char *filename = argv[1];   //argv[1] é o nome do arquivo passado por linha de comando
     int *nL = malloc(1);        //numero de linhas      
     int *nC = malloc(1);        //numero de colunas
-    int *dataImage;             //dataImage é o vetor que armazena a imagem compactada em base 64
+    int *dataImage = malloc(sizeof(int));             //dataImage é o vetor que armazena a imagem compactada em base 64
 
     readFile(header,filename,nL,nC,dataImage);
+
+    //printFile(header,filename,nL,nC,dataImage);   //para Testes
 
     //exibe informações do arquivo
     printf("\n\n\tHeader: %s", header);
