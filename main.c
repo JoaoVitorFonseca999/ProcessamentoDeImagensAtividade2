@@ -3,8 +3,6 @@
 #include <stdlib.h>
 //importando imagelib.h
 #include "imagelib.h"
-//importando string.h
-#include <stdio.h>
 
 #define TAM_DICT 4096
 #define NUM_SIMB 256
@@ -134,7 +132,7 @@ void codifica(int *in, int n)
     printf("[%d]\n", corrente);
 }
 //my functions
-void readFile(char *header, char *filename, int *nL, int *nC, char *dataImage)
+void readFile(char *header, char *filename, int *nL, int *nC, int *dataImage)
 {
     FILE *file = fopen(filename, "r");
     if (file == NULL)
@@ -142,13 +140,37 @@ void readFile(char *header, char *filename, int *nL, int *nC, char *dataImage)
         printf("Erro ao abrir o arquivo %s\n", filename);
         exit(1);
     }
+
+    //imagem
+    //dataImage = malloc(sizeof(int) * (*nL) * (*nC));
+
     //ler o cabecalho
     fread(header, 1, sizeof(header), file);
-    //ler o numero de linhas e colunas
-    fscanf(file, "%d%d", nL, nC);
     
+    //ler o numero de linhas e colunas com fscan
+    fscanf(file, "%d %d", nL, nC);
+
+    //ler o conteudo da imagem
+
+    char *auxLine;      
+    //auxLine = malloc(sizeof(char)*(*nL)*(*nC));
+    auxLine = calloc(sizeof(char), (*nL)*(*nC));
     
 
+    int qntdPixels = 0;
+    for (int i = 0; i < *nL ; i++)
+    {
+        for (int j = 0; j < *nC; j++)
+        {
+            fscanf(file, "%c", &auxLine[i*(*nC)+j]);
+            printf("%c", auxLine[i*(*nC)+j]);
+            qntdPixels++;
+        }      
+    }
+    printf("\n");
+    printf("PIXELS %d\n", qntdPixels);
+
+    
     
     fclose(file);
 }
@@ -159,14 +181,9 @@ int main(int argc, char *argv[])
     //atividade////
     char *header = malloc(7);   //header do arquivo
     char *filename = argv[1];   //argv[1] é o nome do arquivo passado por linha de comando
-    int *nL;                    //numero de linhas      
-    int *nC;                    //numero de colunas
-    char *dataImage;            //dataImage é o vetor que armazena a imagem compactada em base 64
-
-    //alocando memoria para os vetores
-    nL = malloc(sizeof(int));
-    nC = malloc(sizeof(int));
-
+    int *nL = malloc(1);        //numero de linhas      
+    int *nC = malloc(1);        //numero de colunas
+    int *dataImage;             //dataImage é o vetor que armazena a imagem compactada em base 64
 
     readFile(header,filename,nL,nC,dataImage);
 
@@ -174,9 +191,6 @@ int main(int argc, char *argv[])
     printf("\n\n\tHeader: %s", header);
     printf("\tNumero de linhas: %d\n", *nL);
     printf("\tNumero de colunas: %d\n", *nC);
-
-    
-
     ///////////////
     /*
     ui16 in[10] = {4096, 39, 126, 126, 256, 258, 260, 259, 257, 126};
