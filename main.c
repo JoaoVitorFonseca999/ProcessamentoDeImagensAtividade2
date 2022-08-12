@@ -3,6 +3,8 @@
 #include <stdlib.h>
 //importando imagelib.h
 #include "imagelib.h"
+//importando string.h
+#include <stdio.h>
 
 #define TAM_DICT 4096
 #define NUM_SIMB 256
@@ -131,16 +133,48 @@ void codifica(int *in, int n)
     }
     printf("[%d]\n", corrente);
 }
+//my functions
+void readFile(char *header, char *filename, int *nL, int *nC, char *dataImage)
+{
+    FILE *file = fopen(filename, "r");
+    if (file == NULL)
+    {
+        printf("Erro ao abrir o arquivo %s\n", filename);
+        exit(1);
+    }
+    fread(header, 1, sizeof(header), file);
+    
+    
+
+    
+    fclose(file);
+}
+
 
 int main(int argc, char *argv[])
 {
+    //atividade////
+    char *header = malloc(7);   //header do arquivo
+    char *filename = argv[1];   //argv[1] é o nome do arquivo passado por linha de comando
+    int *nL,*nC;                //nL é o numero de linhas e nC é o numero de colunas
+    char *dataImage;            //dataImage é o vetor que armazena a imagem compactada em base 64
 
+    readFile(header,filename,nL,nC,dataImage);
+
+    //exibe informações do arquivo
+    printf("\n\n\tHeader: %s", header);
+    printf("\tNumero de linhas: %d\n", *nL);
+    printf("\tNumero de colunas: %d\n", *nC);
+
+    
+
+    ///////////////
+    /*
     ui16 in[10] = {4096, 39, 126, 126, 256, 258, 260, 259, 257, 126};
     int in2[16] = {39, 39, 126, 126, 39, 39, 126, 126, 39, 39, 126, 126, 39, 39, 126, 126};
     codifica(in2, 16);
     decodifica(in, 10);
-    
-    lerImagem();
+    */
     
     return 0;
 }
