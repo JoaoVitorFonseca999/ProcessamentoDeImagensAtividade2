@@ -142,7 +142,10 @@ void readFile(char *header, char *filename, int *nL, int *nC, char *dataImage)
         printf("Erro ao abrir o arquivo %s\n", filename);
         exit(1);
     }
+    //ler o cabecalho
     fread(header, 1, sizeof(header), file);
+    //ler o numero de linhas e colunas
+    fscanf(file, "%d%d", nL, nC);
     
     
 
@@ -156,8 +159,14 @@ int main(int argc, char *argv[])
     //atividade////
     char *header = malloc(7);   //header do arquivo
     char *filename = argv[1];   //argv[1] é o nome do arquivo passado por linha de comando
-    int *nL,*nC;                //nL é o numero de linhas e nC é o numero de colunas
+    int *nL;                    //numero de linhas      
+    int *nC;                    //numero de colunas
     char *dataImage;            //dataImage é o vetor que armazena a imagem compactada em base 64
+
+    //alocando memoria para os vetores
+    nL = malloc(sizeof(int));
+    nC = malloc(sizeof(int));
+
 
     readFile(header,filename,nL,nC,dataImage);
 
