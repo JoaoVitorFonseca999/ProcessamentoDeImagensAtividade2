@@ -132,12 +132,35 @@ void codifica(int *in, int n)
     printf("[%d]\n", corrente);
 }
 //my functions
-int baseToInt( char base ){
-    return 44;
+static char tabelaConversao[] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
+                                'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
+                                'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X',
+                                'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f',
+                                'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n',
+                                'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
+                                'w', 'x', 'y', 'z', '0', '1', '2', '3',
+                                '4', '5', '6', '7', '8', '9', '+', '/'};
+
+int base2Int(char c)
+{
+    for (int i = 0; i < 64; i++)    //Percorre a tabela
+    {
+        if (tabelaConversao[i] == c)
+            return i;                   //Retorna o indice da tabela de conversao
+    }
+    return -1;
+}
+
+int base2bin( char p1, char p2){
+    p1 = base2Int(p1);  //passa o primeiro caracter para inteiro
+    p2 = base2Int(p2);  //passa o segundo caracter para inteiro
+    p1 = (p1 << 6) | p2; //concatena p1 ,deslocado 6 bits para a esquerda, com p2    
+    return p1;
 }
 
 void readFile(char *header, char *filename, int *nL, int *nC, int *dataImage)
 {
+    puts("Reading file...");
     FILE *file = fopen(filename, "r");
     if (file == NULL)
     {
@@ -147,7 +170,7 @@ void readFile(char *header, char *filename, int *nL, int *nC, int *dataImage)
 
     //ler o cabecalho
     fread(header, 1, sizeof(header), file);
-        //ler o numero de linhas e colunas com fscan
+    //ler o numero de linhas e colunas com fscan
     fscanf(file, "%d %d", nL, nC);
 
     //ler o conteudo da imagem
@@ -159,18 +182,15 @@ void readFile(char *header, char *filename, int *nL, int *nC, int *dataImage)
     dataImage = calloc(sizeof(int), (*nL)*(*nC));
 
     int qntdPixels = 0;
-    for (int i = 0; i < *nL ; i++)
+    for (int i = 0; (i+2) <= 10;i+=2) //*nL * *nC; i+=2)
     {
-        for (int j = 0; j < *nC; j++)
-        {
-            fscanf(file, "%c", &auxLine[i*(*nC)+j]);
-            dataImage[i*(*nC)+j] = baseToInt(auxLine[i*(*nC)+j]);
-            qntdPixels++;
-            printf("%d", dataImage[i*(*nC)+j]);
-        }      
+        fscanf(file, "%c", &auxLine[i]);
+        dataImage[i] = base2bin(auxLine[i],auxLine[i+1]);
+        qntdPixels++;
+        printf("%d, ", dataImage[i]);     
     }
     printf("\n");
-    printf("PIXELS %d\n", qntdPixels);
+    printf("PIXELS %d\n\t\t", qntdPixels);
     fclose(file);
 }
 
@@ -212,16 +232,26 @@ int main(int argc, char *argv[])
     //printFile(header,filename,nL,nC,dataImage);   //para Testes
 
     //exibe informações do arquivo
-    printf("\n\n\tHeader: %s", header);
-    printf("\tNumero de linhas: %d\n", *nL);
-    printf("\tNumero de colunas: %d\n", *nC);
-    ///////////////
+    printf("\n\n\t\tHeader: %s", header);
+    printf("\t\tNumero de linhas: %d\n", *nL);
+    printf("\t\tNumero de colunas: %d\n", *nC);
+
+    printf("\t\tCabacalo: %d\n", *header);
+
+    //Descodifica a imagem
+   
+
+
+    /////////////// exemplo de uso decodificador ///////////////
     /*
     ui16 in[10] = {4096, 39, 126, 126, 256, 258, 260, 259, 257, 126};
     int in2[16] = {39, 39, 126, 126, 39, 39, 126, 126, 39, 39, 126, 126, 39, 39, 126, 126};
     codifica(in2, 16);
     decodifica(in, 10);
     */
-    
+
+   //testess
+    /*
+    */
     return 0;
 }
