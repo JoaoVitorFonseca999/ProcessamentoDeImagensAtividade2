@@ -160,7 +160,6 @@ int base2bin( char p1, char p2){
 
 void readFile(char *header, char *filename, int *nL, int *nC, int *dataImage)
 {
-    puts("Reading file...");
     FILE *file = fopen(filename, "r");
     if (file == NULL)
     {
@@ -169,28 +168,33 @@ void readFile(char *header, char *filename, int *nL, int *nC, int *dataImage)
     }
 
     //ler o cabecalho
-    fread(header, 1, sizeof(header), file);
+    fscanf(file, "%s", header);
+
     //ler o numero de linhas e colunas com fscan
     fscanf(file, "%d %d", nL, nC);
 
     //ler o conteudo da imagem
-    dataImage = malloc(*nL * *nC * sizeof(int));
+    dataImage = malloc(*nL * *nC * sizeof(ui16));
     
-    char *auxLine;      
+    char aux1;
+    char aux2;      
     //auxLine = malloc(sizeof(char)*(*nL)*(*nC));
-    auxLine = calloc(sizeof(char), (*nL)*(*nC));
+    //auxLine = calloc(sizeof(char), (*nL)*(*nC));
     dataImage = calloc(sizeof(int), (*nL)*(*nC));
 
-    int qntdPixels = 0;
-    for (int i = 0; (i+2) <= 10;i+=2) //*nL * *nC; i+=2)
+    int qntdPixels = -2;    //tomei essa decisão pensando na otimização das comparaçõeos no FOR a baixo
+    for (int i = -2; (i) <=*nL * *nC;)
     {
-        fscanf(file, "%c", &auxLine[i]);
-        dataImage[i] = base2bin(auxLine[i],auxLine[i+1]);
+        i+=2;
+        fscanf(file, "%c", &aux1);
+        fscanf(file, "%c", &aux2);
+        dataImage[i] = base2bin(aux1,aux2);
         qntdPixels++;
-        printf("%d, ", dataImage[i]);     
+        //printf("%d, ", dataImage[i]);
+
     }
-    printf("\n");
-    printf("PIXELS %d\n\t\t", qntdPixels);
+    
+    printf("\n\t\tPIXELS %d\n\t\t", qntdPixels);
     fclose(file);
 }
 
@@ -233,11 +237,8 @@ int main(int argc, char *argv[])
 
     //exibe informações do arquivo
     printf("\n\n\t\tHeader: %s", header);
-    printf("\t\tNumero de linhas: %d\n", *nL);
+    printf("\n\t\tNumero de linhas: %d\n", *nL);
     printf("\t\tNumero de colunas: %d\n", *nC);
-
-    printf("\t\tCabacalo: %d\n", *header);
-
     //Descodifica a imagem
    
 
