@@ -158,7 +158,7 @@ int base2bin( char p1, char p2){
     return p1;
 }
 
-void readFile(char *header, char *filename, int *nL, int *nC, int *dataImage)
+void readFile(char *header, char *filename, int *nL, int *nC, ui16 *dataImage)
 {
     puts("Reading file...");
     FILE *file = fopen(filename, "r");
@@ -169,28 +169,33 @@ void readFile(char *header, char *filename, int *nL, int *nC, int *dataImage)
     }
 
     //ler o cabecalho
-    fread(header, 1, sizeof(header), file);
+    fscanf(file, "%s", header);
+    //fread(header, 1, sizeof(header), file);
     //ler o numero de linhas e colunas com fscan
     fscanf(file, "%d %d", nL, nC);
 
     //ler o conteudo da imagem
-    dataImage = malloc(*nL * *nC * sizeof(int));
+    dataImage = malloc(*nL * *nC * sizeof(ui16));
     
-    char *auxLine;      
+    char aux1;
+    char aux2;      
     //auxLine = malloc(sizeof(char)*(*nL)*(*nC));
-    auxLine = calloc(sizeof(char), (*nL)*(*nC));
-    dataImage = calloc(sizeof(int), (*nL)*(*nC));
+    //auxLine = calloc(sizeof(char), (*nL)*(*nC));
+    dataImage = calloc(sizeof(ui16), (*nL)*(*nC));
 
-    int qntdPixels = 0;
-    for (int i = 0; (i+2) <= 10;i+=2) //*nL * *nC; i+=2)
+    int qntdPixels = -2;    //tomei essa decisão pensando na otimização das comparaçõeos no FOR a baixo
+    for (int i = -2; (i) <=*nL * *nC;)
     {
-        fscanf(file, "%c", &auxLine[i]);
-        dataImage[i] = base2bin(auxLine[i],auxLine[i+1]);
+        i+=2;
+        fscanf(file, "%c", &aux1);
+        fscanf(file, "%c", &aux2);
+        dataImage[i] = base2bin(aux1,aux2);
         qntdPixels++;
-        printf("%d, ", dataImage[i]);     
+        //printf("%d, ", dataImage[i]);
+
     }
-    printf("\n");
-    printf("PIXELS %d\n\t\t", qntdPixels);
+    
+    printf("\n\t\tPIXELS %d\n\t\t", qntdPixels);
     fclose(file);
 }
 
@@ -225,7 +230,7 @@ int main(int argc, char *argv[])
     char *filename = argv[1];   //argv[1] é o nome do arquivo passado por linha de comando
     int *nL = malloc(1);        //numero de linhas      
     int *nC = malloc(1);        //numero de colunas
-    int *dataImage;             //dataImage é o vetor que armazena a imagem compactada em base 64
+    ui16 *dataImage;             //dataImage é o vetor que armazena a imagem compactada em base 64
 
     readFile(header,filename,nL,nC,dataImage);
 
@@ -236,10 +241,16 @@ int main(int argc, char *argv[])
     printf("\t\tNumero de linhas: %d\n", *nL);
     printf("\t\tNumero de colunas: %d\n", *nC);
 
-    printf("\t\tCabacalo: %d\n", *header);
+    
+    //Exibe o ui16 da imagem
+
+    for (int i = 0; i < 1; i++){
+        printf("%d, ", dataImage[i]);
+    }
 
     //Descodifica a imagem
    
+    //decodifica(dataImage, (*nL * *nC * sizeof(ui16)));
 
 
     /////////////// exemplo de uso decodificador ///////////////
