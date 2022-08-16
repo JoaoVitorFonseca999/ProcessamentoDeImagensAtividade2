@@ -156,7 +156,7 @@ void readFile(char *header, char *filename, int *nL, int *nC, int *dataImage)
     char *auxLine;      
     //auxLine = malloc(sizeof(char)*(*nL)*(*nC));
     auxLine = calloc(sizeof(char), (*nL)*(*nC));
-    
+    dataImage = calloc(sizeof(int), (*nL)*(*nC));
 
     int qntdPixels = 0;
     for (int i = 0; i < *nL ; i++)
@@ -164,9 +164,9 @@ void readFile(char *header, char *filename, int *nL, int *nC, int *dataImage)
         for (int j = 0; j < *nC; j++)
         {
             fscanf(file, "%c", &auxLine[i*(*nC)+j]);
-            //printf("%c", auxLine[i*(*nC)+j]);
             dataImage[i*(*nC)+j] = baseToInt(auxLine[i*(*nC)+j]);
             qntdPixels++;
+            printf("%d", dataImage[i*(*nC)+j]);
         }      
     }
     printf("\n");
@@ -205,7 +205,7 @@ int main(int argc, char *argv[])
     char *filename = argv[1];   //argv[1] é o nome do arquivo passado por linha de comando
     int *nL = malloc(1);        //numero de linhas      
     int *nC = malloc(1);        //numero de colunas
-    int *dataImage = malloc(sizeof(int));             //dataImage é o vetor que armazena a imagem compactada em base 64
+    int *dataImage;             //dataImage é o vetor que armazena a imagem compactada em base 64
 
     readFile(header,filename,nL,nC,dataImage);
 
