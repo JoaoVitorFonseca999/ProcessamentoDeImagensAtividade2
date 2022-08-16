@@ -158,7 +158,7 @@ int base2bin( char p1, char p2){
     return p1;
 }
 
-void readFile(char *header, char *filename, int *nL, int *nC, int *dataImage)
+void readFile(char *header, char *filename, int *nL, int *nC, int *dataImage,ui16 *in)
 {
     FILE *file = fopen(filename, "r");
     if (file == NULL)
@@ -174,52 +174,35 @@ void readFile(char *header, char *filename, int *nL, int *nC, int *dataImage)
     fscanf(file, "%d %d", nL, nC);
 
     //ler o conteudo da imagem
-    dataImage = malloc(*nL * *nC * sizeof(ui16));
+    dataImage = malloc(*nL * *nC * sizeof(int));
     
     char aux1;
     char aux2;      
-    //auxLine = malloc(sizeof(char)*(*nL)*(*nC));
-    //auxLine = calloc(sizeof(char), (*nL)*(*nC));
-    dataImage = calloc(sizeof(int), (*nL)*(*nC));
-
-    int qntdPixels = -2;    //tomei essa decisão pensando na otimização das comparaçõeos no FOR a baixo
-    for (int i = -2; (i) <=*nL * *nC;)
+    
+    dataImage = calloc(sizeof(int), (*nL)*(*nC)*1/2);
+    in = malloc(*nL * *nC * sizeof(int));
+    int qntdPixels = 0; 
+    for (int i,x; (i) <=*nL * *nC * 1/2;i+=2)
     {
-        i+=2;
         fscanf(file, "%c", &aux1);
         fscanf(file, "%c", &aux2);
-        dataImage[i] = base2bin(aux1,aux2);
+        x+=1;
+        in[x] = base2bin(aux1,aux2);
         qntdPixels++;
-        //printf("%d, ", dataImage[i]);
-
+        //printf("%d, ", in[x]);
     }
+    //teste
+    //alocando espaço em in
+    //in = malloc(*nL * *nC * sizeof(int));
+    //in[1] = 0;
     
+
     printf("\n\t\tPIXELS %d\n\t\t", qntdPixels);
     fclose(file);
+    decodifica(in, qntdPixels);
 }
 
-void printFile(char *header, char *filename, int *nL, int *nC, int *dataImage){
-    char *fileName = malloc(sizeof(char)*(strlen(filename)+strlen(".out")));
-    FILE *file = fopen("Resultado", "wt");
-    if (file == NULL)
-    {
-        printf("Erro ao salvar o arquivo %s\n", filename);
-        exit(1);
-    }
-    fwrite(header, 1, sizeof(header), file);
-    fprintf(file, "%d %d\n", *nL, *nC);
-    
-    for (int i = 0; i < *nL ; i++)
-    {
-        for (int j = 0; j < *nC; j++)
-        {
-            fprintf(file, "%d", dataImage[i*(*nC)+j]);
-        }
-        fprintf(file, "\n");
-    }
 
-    fclose(file);
-}
 
 
 int main(int argc, char *argv[])
@@ -231,16 +214,25 @@ int main(int argc, char *argv[])
     int *nC = malloc(1);        //numero de colunas
     int *dataImage;             //dataImage é o vetor que armazena a imagem compactada em base 64
 
-    readFile(header,filename,nL,nC,dataImage);
+    ui16 *in;
+    in = malloc(1);
 
-    //printFile(header,filename,nL,nC,dataImage);   //para Testes
+    readFile(header,filename,nL,nC,dataImage,in);
+
 
     //exibe informações do arquivo
     printf("\n\n\t\tHeader: %s", header);
     printf("\n\t\tNumero de linhas: %d\n", *nL);
     printf("\t\tNumero de colunas: %d\n", *nC);
     //Descodifica a imagem
+   /*mostra a variável com dados da ima
+   for(int i =0;i<10;i++){
+    printf("%d, ", dataImage[i]);
    
+   printf("\n\n\t\t TESTE \n");
+   for(int i =0;i<100;i++){
+    printf("%d, ", in[i]);
+    }}*/
 
 
     /////////////// exemplo de uso decodificador ///////////////
