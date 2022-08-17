@@ -148,14 +148,19 @@ int base2Int(char c)
         if (tabelaConversao[i] == c)
             return i;                   //Retorna o indice da tabela de conversao
     }
-    return -1;
+    printf("Erro ao converter caracter %c\n", c);
+    return 0;
 }
 
 int base2bin( char p1, char p2){
+    int mask = 00111111;
     p1 = base2Int(p1);  //passa o primeiro caracter para inteiro
     p2 = base2Int(p2);  //passa o segundo caracter para inteiro
-    p1 = (p1 << 6) | p2; //concatena p1 ,deslocado 6 bits para a esquerda, com p2    
-    return p1;
+    p1 = p1 & mask;    //faz o AND com a mascara
+    p2 = p2 & mask;    //faz o AND com a mascara
+
+     //concatena p1 ,deslocado 6 bits para a esquerda, com p2   e aplica mascara de 12 bits
+    return (((p1 << 6) | p2)&(0000111111111111));
 }
 
 void readFile(char *header, char *filename, int *nL, int *nC, int *dataImage,ui16 *in)
@@ -174,22 +179,21 @@ void readFile(char *header, char *filename, int *nL, int *nC, int *dataImage,ui1
     fscanf(file, "%d %d", nL, nC);
 
     //ler o conteudo da imagem
-    dataImage = malloc(*nL * *nC * sizeof(int));
-    
     char aux1;
     char aux2;      
     
-    dataImage = calloc(sizeof(int), (*nL)*(*nC)*1/2);
-    in = malloc(*nL * *nC * sizeof(int));
+    in = malloc(*nL * *nC * sizeof(ui16));
+    
     int qntdPixels = 0; 
-    for (int i,x; (i) <=*nL * *nC * 1/2;i+=2)
+    int x = 0;
+    for (int i; (i) <=*nL * *nC * 1/2;i+=2)
     {
         fscanf(file, "%c", &aux1);
         fscanf(file, "%c", &aux2);
-        x+=1;
         in[x] = base2bin(aux1,aux2);
+        printf("%d, ",in[x]);
+        x+=1;
         qntdPixels++;
-        //printf("%d, ", in[x]);
     }
     //teste
     //alocando espaço em in
@@ -199,7 +203,7 @@ void readFile(char *header, char *filename, int *nL, int *nC, int *dataImage,ui1
 
     printf("\n\t\tPIXELS %d\n\t\t", qntdPixels);
     fclose(file);
-    decodifica(in, qntdPixels);
+    //decodifica(in, qntdPixels);
 }
 
 
@@ -237,14 +241,19 @@ int main(int argc, char *argv[])
 
     /////////////// exemplo de uso decodificador ///////////////
     /*
-    ui16 in[10] = {4096, 39, 126, 126, 256, 258, 260, 259, 257, 126};
+    ui16 in4[10] = {126, 39, 126, 126, 256, 258, 260, 259, 257, 126};
     int in2[16] = {39, 39, 126, 126, 39, 39, 126, 126, 39, 39, 126, 126, 39, 39, 126, 126};
-    codifica(in2, 16);
-    decodifica(in, 10);
+    //codifica(in2, 16);
+    decodifica(in4, 10);
     */
 
    //testess
     /*
+   for (int i = 0; i < 100; i++)
+   {
+    printf("%d, ", in[i]);
+    }
     */
+   
     return 0;
 }
