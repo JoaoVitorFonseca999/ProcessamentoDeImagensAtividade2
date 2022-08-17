@@ -30,8 +30,17 @@ ui16 *aloca(alocaInfo *aloc, int len)
     return ret;
 }
 
-void decodifica(ui16 *in, int n)
+void decodifica(ui16 *in, int n,int nL, int nC)
 {
+    FILE * arq;
+    arq = fopen("Resultado.pgm","w");
+    fprintf(arq,"P2\n");
+    fprintf(arq,"%d %d\n",nC,nL);
+    fprintf(arq,"%d\n",255);
+
+    int auxCount = 0;
+
+
     struct
     {
         ui16 *seq;
@@ -55,6 +64,9 @@ void decodifica(ui16 *in, int n)
     posDict = NUM_SIMB;
     anterior = in[0];
     printf("[%d]-", anterior);
+    fprintf(arq,"%d ",anterior);
+
+    auxCount++;
     i = 1;
     while (i < n)
     {
@@ -91,6 +103,12 @@ void decodifica(ui16 *in, int n)
         for (int k = 0; k < dicionario[anterior].tam; k++)
         {
             printf("[%d]-", dicionario[simbolo].seq[k]);
+            fprintf(arq,"%d ",dicionario[simbolo].seq[k]);            
+            auxCount++;
+            if(auxCount>=nC){
+                fprintf(arq,"\n");
+                auxCount = 0;
+            }
         }
         anterior = simbolo;
     }
@@ -131,6 +149,8 @@ void codifica(int *in, int n)
     }
     printf("[%d]\n", corrente);
 }
+
+
 //my functions
 static char tabelaConversao[] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
                                 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
@@ -154,13 +174,18 @@ int base2Int(char c)
 
 int base2bin( char p1, char p2){
     int mask = 00111111;
-    p1 = base2Int(p1);  //passa o primeiro caracter para inteiro
-    p2 = base2Int(p2);  //passa o segundo caracter para inteiro
-    p1 = p1 & mask;    //faz o AND com a mascara
-    p2 = p2 & mask;    //faz o AND com a mascara
+    int x = base2Int(p1);  //passa o primeiro caracter para inteiro
+    int y = base2Int(p2);  //passa o segundo caracter para inteiro
+
+    // p1 = p1 & mask;    //faz o AND com a mascara
+    // p2 = p2 & mask;    //faz o AND com a mascara
 
      //concatena p1 ,deslocado 6 bits para a esquerda, com p2   e aplica mascara de 12 bits
-    return (((p1 << 6) | p2)&(0000111111111111));
+
+    x = x << 6;
+    return (x|y);
+
+    //return (((p1 << 6) | p2)&(0000111111111111));
 }
 
 void readFile(char *header, char *filename, int *nL, int *nC, int *dataImage,ui16 *in)
@@ -178,6 +203,8 @@ void readFile(char *header, char *filename, int *nL, int *nC, int *dataImage,ui1
     //ler o numero de linhas e colunas com fscan
     fscanf(file, "%d %d", nL, nC);
 
+    //ignora quebra de linha
+
     //ler o conteudo da imagem
     char aux1;
     char aux2;      
@@ -186,15 +213,33 @@ void readFile(char *header, char *filename, int *nL, int *nC, int *dataImage,ui1
     
     int qntdPixels = 0; 
     int x = 0;
-    for (int i; (i) <=*nL * *nC * 1/2;i+=2)
+    for (int i = 0; (i+2) <=  *nL * *nC;i+=2)
     {
+        
         fscanf(file, "%c", &aux1);
+        while(aux1 == '\n'){
+            fscanf(file,"%c",&aux1);
+        }
+
         fscanf(file, "%c", &aux2);
+        while(aux2 == '\n'){
+            fscanf(file,"%c",&aux2);
+        }
+
+
+
         in[x] = base2bin(aux1,aux2);
-        printf("%d, ",in[x]);
+        //teste
+        //printf("Letras: [%c, %c] \t base2int (%d,%d)\t ----> \tbase2Bin %d\n ",aux1,aux2,base2Int(aux1),base2Int(aux2),in[x]);
+
+
         x+=1;
         qntdPixels++;
     }
+
+    decodifica(in,qntdPixels,*nL,*nC);
+
+
     //teste
     //alocando espaço em in
     //in = malloc(*nL * *nC * sizeof(int));
@@ -222,6 +267,8 @@ int main(int argc, char *argv[])
     in = malloc(1);
 
     readFile(header,filename,nL,nC,dataImage,in);
+
+    
 
 
     //exibe informações do arquivo
