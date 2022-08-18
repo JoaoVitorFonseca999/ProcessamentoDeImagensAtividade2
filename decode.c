@@ -1,3 +1,14 @@
+/*-------------------------------------------------
+  | Unifal - Universidade Federal de Alfenas.
+  | BACHARELADO EM CIENCIA DA COMPUTACAO.
+  | Trabalho..: Descompactador do formato LZW Base64.
+  | Disciplina: Processamento de Imagens
+  | Professor.: Luiz Eduardo da Silva
+  | Aluno.....: João Vitor Fonseca
+  | Data......: 17/08/2022
+  -------------------------------------------------*/
+
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -30,10 +41,16 @@ ui16 *aloca(alocaInfo *aloc, int len)
     return ret;
 }
 
-void decodifica(ui16 *in, int n,int nL, int nC)
+void decodifica(ui16 *in, int n,int nL, int nC,char *name)
 {
+    //remove a extensao do nome do arquivo
+    char *ext = ".l64";
+    name = strtok(name, ext);
+    //concatena a extensao do arquivo com o nome do arquivo
+    strcat(name, ".pgm");    
+
     FILE * arq;
-    arq = fopen("Resultado.pgm","w");
+    arq = fopen(name,"w");
     fprintf(arq,"P2\n");
     fprintf(arq,"%d %d\n",nC,nL);
     fprintf(arq,"%d\n",255);
@@ -63,7 +80,7 @@ void decodifica(ui16 *in, int n,int nL, int nC)
     }
     posDict = NUM_SIMB;
     anterior = in[0];
-    printf("[%d]-", anterior);
+    //printf("[%d]-", anterior);
     fprintf(arq,"%d ",anterior);
 
     auxCount++;
@@ -102,7 +119,7 @@ void decodifica(ui16 *in, int n,int nL, int nC)
         }
         for (int k = 0; k < dicionario[anterior].tam; k++)
         {
-            printf("[%d]-", dicionario[simbolo].seq[k]);
+            //printf("[%d]-", dicionario[simbolo].seq[k]);
             fprintf(arq,"%d ",dicionario[simbolo].seq[k]);            
             auxCount++;
             if(auxCount>=nC){
@@ -188,7 +205,7 @@ int base2bin( char p1, char p2){
     //return (((p1 << 6) | p2)&(0000111111111111));
 }
 
-void readFile(char *header, char *filename, int *nL, int *nC, int *dataImage,ui16 *in)
+void readFile(char *header, char *filename, int *nL, int *nC,ui16 *in, char * img_name)
 {
     FILE *file = fopen(filename, "r");
     if (file == NULL)
@@ -213,42 +230,33 @@ void readFile(char *header, char *filename, int *nL, int *nC, int *dataImage,ui1
     
     int qntdPixels = 0; 
     int x = 0;
-    for (int i = 0; (i+2) <=  *nL * *nC;i+=2)
+    //enquanto
+    while(!feof(file))
     {
-        
         fscanf(file, "%c", &aux1);
-        while(aux1 == '\n'){
-            fscanf(file,"%c",&aux1);
+        if(aux1 == '\n'){
+            continue;
         }
 
         fscanf(file, "%c", &aux2);
-        while(aux2 == '\n'){
-            fscanf(file,"%c",&aux2);
+        if(aux2 == '\n'){
+            continue;
         }
-
-
 
         in[x] = base2bin(aux1,aux2);
         //teste
         //printf("Letras: [%c, %c] \t base2int (%d,%d)\t ----> \tbase2Bin %d\n ",aux1,aux2,base2Int(aux1),base2Int(aux2),in[x]);
-
-
         x+=1;
         qntdPixels++;
     }
 
-    decodifica(in,qntdPixels,*nL,*nC);
-
-
-    //teste
-    //alocando espaço em in
-    //in = malloc(*nL * *nC * sizeof(int));
-    //in[1] = 0;
+    //Prepara nomedo arquivo de saida
     
 
-    printf("\n\t\tPIXELS %d\n\t\t", qntdPixels);
+    decodifica(in,qntdPixels,*nL,*nC,img_name);
+    
+    //printf("\n\t\tPIXELS %d\n\t\t", qntdPixels);
     fclose(file);
-    //decodifica(in, qntdPixels);
 }
 
 
@@ -261,18 +269,26 @@ int main(int argc, char *argv[])
     char *filename = argv[1];   //argv[1] é o nome do arquivo passado por linha de comando
     int *nL = malloc(1);        //numero de linhas      
     int *nC = malloc(1);        //numero de colunas
-    int *dataImage;             //dataImage é o vetor que armazena a imagem compactada em base 64
 
     ui16 *in;
     in = malloc(1);
 
-    readFile(header,filename,nL,nC,dataImage,in);
-
-    
-
-
+    //tratar name
+    int iAux1 = 0;
+    while(filename[iAux1] != '\0')
+    {
+        iAux1++;
+    }
+    if(!(filename[iAux1-4] == '.' && filename[iAux1-3] == 'l' && filename[iAux1-2] == '6' && filename[iAux1-1] == '4')){
+        filename[iAux1] = '.';                       // :)
+        filename[iAux1+1] = 'l';
+        filename[iAux1+2] = '6';
+        filename[iAux1+3] = '4';
+        filename[iAux1+4] = '\0';
+    }
+    readFile(header,filename,nL,nC,in,filename);   
     //exibe informações do arquivo
-    printf("\n\n\t\tHeader: %s", header);
+    printf("\t\tHeader: %s", header);
     printf("\n\t\tNumero de linhas: %d\n", *nL);
     printf("\t\tNumero de colunas: %d\n", *nC);
     //Descodifica a imagem
